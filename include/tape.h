@@ -10,7 +10,6 @@ struct Node;
 struct Tape {
     std::vector<std::shared_ptr<Node>> nodes;
 
-
     // Singleton access method
     static Tape& get() {
         static Tape instance; // initialized on first use with the private constructor
@@ -20,6 +19,14 @@ struct Tape {
     // Push a node to the tape
     void push(const std::shared_ptr<Node>& node) {
         nodes.push_back(node);
+    }
+
+    // Execture the backward pass through the tape
+    // This performs a synchronous backward propagation step to compute adjoints
+    void execute_backpass() {
+        for(auto iter = nodes.rbegin(); iter != nodes.rend(); ++iter) {
+            iter->get()->execute_backward();
+        }
     }
 
 private:
