@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
 project(options_pricing)
 set(CMAKE_CXX_STANDARD 17)
-add_executable(options_pricing src/main.cpp src/variable.cpp)
+add_executable(options_pricing src/main.cpp src/variable_data.cpp src/variable.cpp src/operators.cpp)
 target_include_directories(options_pricing PRIVATE include)
