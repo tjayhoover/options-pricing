@@ -7,8 +7,9 @@
 #include <memory>
 #include <functional>
 
+
 // Forward declaration to avoid circular dependency
-struct Variable;
+struct VariableData;
 
 // Represents a node in the computation graph
 // Each node corresponds to one operation involving inputs and outputs
@@ -16,10 +17,13 @@ struct Variable;
 struct Node {
     Node() = default;
 
-    std::vector<Variable*> inputs;
-    Variable* output;
+    std::vector<std::weak_ptr<VariableData>> inputs;
+    std::shared_ptr<VariableData> output;
+    std::function<void(const Node&)> backward_function;
 
-    std::function<void()> backward_function;
+    void execute_backward() {
+        backward_function(*this);
+    }
 };
 
 #endif

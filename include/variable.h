@@ -1,29 +1,38 @@
 #ifndef VARIABLE_H
 #define VARIABLE_H
 
-#include "node.h"
-#include "tape.h"
+#include <memory>
+#include <optional>
 
+struct VariableData;
+
+// Lightweight wrapper around a VariableData pointer
+// Objects of type Variable can be copied and should not be created on the heap
+// The actual data (VariableData) will be stored on the heap
 struct Variable {
-    double adjoint = 0.0;
-    double value;
-    Node* node;
-    Tape* tape;
+    // Constructor (allocates new variableData to the heap with value if provided)
+    Variable(std::optional<double> val);
 
-    Variable() : value(0.0), node(nullptr), tape(nullptr) {}
+    // Pointer to the variable data which is stored on the heap
+    std::shared_ptr<VariableData> ptr;
 
-    // Overloaded multiplication operator
-    double operator*(const Variable& other);
-    
-    // Overloaded addition operator
-    double operator+(const Variable& other);  // Overloaded subtraction operator
-    double operator-(const Variable& other);
-    // Sine function
-    double sin();
-    double cos();
+    // Get value
+    double value() const;
 
-    // Exponential function
-    double exp();
+    // Get adjoint
+    double adjoint() const;
+
+    // Set the adjoint
+    void setAdjoint(double adjoint);
+
+    // Set the value
+    void setValue(double value);
+
+    // Overloaded operators
+    Variable operator*(const Variable& other) const;
+    Variable operator/(const Variable& other) const;
+    Variable operator+(const Variable& other) const;  
+    Variable operator-(const Variable& other) const;
 };
 
 #endif

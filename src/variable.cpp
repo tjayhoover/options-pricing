@@ -1,4 +1,8 @@
 #include "variable.h"
+#include "node.h"
+#include "variable_data.h"
+#include "tape.h"
+#include "operators.h"
 
 #include <string>
 #include <iostream>
@@ -6,61 +10,99 @@
 #include <cmath>
 #include <vector>
 #include <functional>
+#include <optional>
 
 using namespace std;
 
+// Variable constructor (allocates new VariableData on the heap)
+Variable::Variable(optional<double> value) {
+        // Allocate a new VariableData on the heap
+        ptr = make_shared<VariableData>();
+        if (value.has_value()) {
+            ptr->value = value.value();
+        }
+    }
+
+// Set the adjoint
+void Variable::setAdjoint(double adjoint) {
+    this->ptr->adjoint = adjoint;
+}
+
+// Set the variable
+void Variable::setValue(double variable) {
+    this->ptr->value = variable;
+}
+
 // Overloaded multiplication operator
-double Variable::operator*(const Variable& other) {
-    // Compute the result of the operation
-    double val = this->value * other.value;
+Variable Variable::operator*(const Variable& other) const {
 
-    // Create the output Variable to hold the result
-    auto output = new Variable();
-    output->value = val;
-
-    // Create a new Node in the computation graph for this operation
-    // (Adding the input and output variables to the node.)
-    this->node = new Node();
-    
-    // create input 1 as a fresh Variable and copy the scalar value
-    auto in1 = new Variable();
-    in1->value = this->value;
-    this->node->inputs.push_back(in1);
-    
-    // create input 2 as a fresh Variable and copy the scalar value
-    auto in2 = new Variable();
-    in2->value = other.value;
-    this->node->inputs.push_back(in2);
-    
-    this->node->output = output;
+    // Compute the result of the multiplication
+    double val = this->value() * other.value();
 
     // Define the backward function for derivative computation
-    this->node->backward_function = ([] {cout << "Backward" << endl;});
+    auto backward_func = [] (const Node& node) {
+        const double dz = node.output->adjoint;
+        node.inputs[0].lock()->adjoint += node.inputs[1].lock()->value * dz;
+        node.inputs[1].lock()->adjoint += node.inputs[0].lock()->value * dz;
+    };
 
-    // Push the node onto the tape
-    tape->nodes.push_back(this->node);
+    // Create a new node in the computation graph
+    return create_node(val, *this, other, backward_func);
+}
 
-    return val;
+// Overloaded division operator
+Variable Variable::operator/(const Variable& other) const {
+
+    // Compute the result of the division
+    double val = this->value() / other.value();
+
+    // Define the backward function for derivative computation
+    auto backward_func = [] (const Node& node) {
+        const double dz = node.output->adjoint;
+        double u = node.inputs[0].lock()->value;
+        double v = node.inputs[1].lock()->value;
+        node.inputs[0].lock()->adjoint += (1.0 / v) * dz;
+        node.inputs[1].lock()->adjoint += (-u / (v * v)) * dz;
+    };
+
+    // Create a new node in the computation graph
+    return create_node(val, *this, other, backward_func);
 }
 
 // Overloaded addition operator
-double Variable::operator+(const Variable& other) {
-    return this->value + other.value;
+Variable Variable::operator+(const Variable& other) const {
+    // Compute the result of the addition
+    double val = this->value() + other.value();
+
+    // Define the backward function for derivative computation
+    auto backward_func = [] (const Node& node) {
+        const double dz = node.output->adjoint;
+        node.inputs[0].lock()->adjoint += dz;
+        node.inputs[1].lock()->adjoint += dz;
+    };
+
+    // Create a new node in the computation graph
+    return create_node(val, *this, other, backward_func);
 }
+
 // Overloaded subtraction operator
-double Variable::operator-(const Variable& other) {
-    double output = this->value - other.value;
-    return output;
+Variable Variable::operator-(const Variable& other) const {
+    // Compute the result of the subtraction
+    double val = this->value() - other.value();
+
+    // Define the backward function for derivative computation
+    auto backward_func = [] (const Node& node) {
+        const double dz = node.output->adjoint;
+        node.inputs[0].lock()->adjoint += dz;
+        node.inputs[1].lock()->adjoint += -dz;
+    };
+
+    // Create a new node in the computation graph
+    return create_node(val, *this, other, backward_func);
 }
-// Sine function
-double Variable::sin() {
-    return std::sin(this->value);
-}
-// Cosine function
-double Variable::cos() {
-    return std::cos(this->value);
-}
-// Exponential function
-double Variable::exp() {
-    return std::exp(this->value);
-}
+
+// Get value
+double Variable::value() const { return ptr.get()->value; }
+
+// Get adjoint
+double Variable::adjoint() const { return ptr.get()->adjoint; }
