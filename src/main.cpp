@@ -14,7 +14,7 @@ int main() {
     Variable y = Variable(4.0);
 
     // Write the expression (implicitly builds a computation graph)
-    Variable z = sin(x + y) * exp(x / y);
+    Variable z = sin(x + y) * exp(x / y) * cos(x * y);
 
     cout << "Number of nodes in tape after operation: " << Tape::get().nodes.size() << endl;
 

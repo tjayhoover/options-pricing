@@ -29,10 +29,10 @@ struct Variable {
     void setValue(double value);
 
     // Overloaded operators
-    Variable operator*(const Variable& other);
-    Variable operator/(const Variable& other);
-    Variable operator+(const Variable& other);  
-    Variable operator-(const Variable& other);
+    Variable operator*(const Variable& other) const;
+    Variable operator/(const Variable& other) const;
+    Variable operator+(const Variable& other) const;  
+    Variable operator-(const Variable& other) const;
 };
 
 #endif

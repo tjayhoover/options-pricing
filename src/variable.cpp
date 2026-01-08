@@ -34,7 +34,7 @@ void Variable::setValue(double variable) {
 }
 
 // Overloaded multiplication operator
-Variable Variable::operator*(const Variable& other) {
+Variable Variable::operator*(const Variable& other) const {
 
     // Compute the result of the multiplication
     double val = this->value() * other.value();
@@ -51,7 +51,7 @@ Variable Variable::operator*(const Variable& other) {
 }
 
 // Overloaded division operator
-Variable Variable::operator/(const Variable& other) {
+Variable Variable::operator/(const Variable& other) const {
 
     // Compute the result of the division
     double val = this->value() / other.value();
@@ -70,7 +70,7 @@ Variable Variable::operator/(const Variable& other) {
 }
 
 // Overloaded addition operator
-Variable Variable::operator+(const Variable& other) {
+Variable Variable::operator+(const Variable& other) const {
     // Compute the result of the addition
     double val = this->value() + other.value();
 
@@ -86,7 +86,7 @@ Variable Variable::operator+(const Variable& other) {
 }
 
 // Overloaded subtraction operator
-Variable Variable::operator-(const Variable& other) {
+Variable Variable::operator-(const Variable& other) const {
     // Compute the result of the subtraction
     double val = this->value() - other.value();
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <memory>
 
-struct Node;
+#include "node.h"
 
 // Represents the tape that records the sequence of operations (nodes)
 struct Tape {
@@ -12,7 +12,9 @@ struct Tape {
 
     // Singleton access method
     static Tape& get() {
-        static Tape instance; // initialized on first use with the private constructor
+        static Tape instance;
+        // initialized on first use with the private constructor
+
         return instance;
     }
 
@@ -29,12 +31,16 @@ struct Tape {
         }
     }
 
+    // Reset the tape by clearing all recorded nodes
+    void reset() {
+        nodes.clear();
+    }
+
 private:
     Tape() = default;               // private constructor
     ~Tape() = default;
     Tape(const Tape&) = delete;     // no copy
     Tape& operator=(const Tape&) = delete; // no assignment
-
 };
 
 #endif
